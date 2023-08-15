@@ -2,69 +2,60 @@ const button = document.querySelector('.button-add-task');
 const input = document.querySelector('.input-task');
 const fullList = document.querySelector('.list-task');
 
-let myItensList = [];
+let myItemsList = [];
 
 function addNewTask() {
   const taskText = input.value.trim();
   if (taskText !== '') {
-    myItensList.push({
+    myItemsList.push({
       task: taskText,
       complete: false,
     });
 
     input.value = '';
-
-    showTask();
+    showTasks();
   } else {
     alert('Por favor, insira uma descrição para a tarefa.');
   }
-
-  showTask();
-}
-
-function showTask() {
-  let newLi = '';
-
-  myItensList.forEach((item, index) => {
-    newLi =
-      newLi +
-      `
-
-    <li class='task ${item.complete && 'done'}' >
-        <img src='./src/img/checked.png' alt='check na tarefa' onclick='completeTask(${index})'/>
-        <p>${item.task}</p>
-        <img src='./src/img/trash.png' alt='deletar tarefa' onclick='deleteTask(${index})'/>
-    </li>
-
-    `;
-  });
-
-  fullList.innerHTML = newLi;
-
-  localStorage.setItem('list', JSON.stringify(myItensList));
 }
 
 function completeTask(index) {
-  myItensList[index].complete = !myItensList[index].complete;
-
-  showTask();
+  myItemsList[index].complete = !myItemsList[index].complete;
+  showTasks();
 }
 
 function deleteTask(index) {
-  myItensList.splice(index, 1);
-
-  showTask();
+  myItemsList.splice(index, 1);
+  showTasks();
 }
 
-function reloadTask() {
-  const localStorageTask = localStorage.getItem('list');
+function showTasks() {
+  const tasksHTML = myItemsList.map((item, index) => createTaskHTML(item, index)).join('');
+  fullList.innerHTML = tasksHTML;
+  saveTasksToLocalStorage();
+}
 
-  if (localStorageTask) {
-    myItensList = JSON.parse(localStorageTask);
+function createTaskHTML(item, index) {
+  return `
+    <li class="task ${item.complete ? 'done' : ''}">
+      <img src="./src/img/checked.png" alt="check na tarefa" onclick="completeTask(${index})"/>
+      <p>${item.task}</p>
+      <img src="./src/img/trash.png" alt="deletar tarefa" onclick="deleteTask(${index})"/>
+    </li>
+  `;
+}
+
+function saveTasksToLocalStorage() {
+  localStorage.setItem('list', JSON.stringify(myItemsList));
+}
+
+function reloadTasks() {
+  const localStorageTasks = localStorage.getItem('list');
+  if (localStorageTasks) {
+    myItemsList = JSON.parse(localStorageTasks);
   }
-
-  showTask();
+  showTasks();
 }
 
-reloadTask();
+reloadTasks();
 button.addEventListener('click', addNewTask);
